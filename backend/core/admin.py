@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import ProjectEntry
+from core.models import ProjectEntry, ProjectEntryWebHook
 
 
 class ProjectEntryAdmin(admin.ModelAdmin):
@@ -9,4 +9,11 @@ class ProjectEntryAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
 
 
+class ProjectEntryWebHookAdmin(admin.ModelAdmin):
+    list_display = ("name", "owner")
+    list_filter = ("owner",)
+    search_fields = ("name",)
+
+
 admin.site.register(ProjectEntry, ProjectEntryAdmin)
+admin.site.register(ProjectEntryWebHook, ProjectEntryWebHookAdmin)
