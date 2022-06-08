@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
 
 
-class TestProjectEntryNoUser(TestCase):
+class TestProjectEntryNoUser(APITestCase):
     # NOTE: While the payloads are invalid (missing)
     # but we still expect things to fail due to authorisation denied
     def setUp(self) -> None:
@@ -36,14 +36,14 @@ class TestProjectEntryNoUser(TestCase):
         self.assertEquals(response.status_code, 401)
 
 
-class TestProjectEntryEndpontsAdmin(TestCase):
+class TestProjectEntryEndpontsAdmin(APITestCase):
     fixtures = ["users.json", "project_entries.json"]
 
     def setUp(self) -> None:
         UserModel = get_user_model()  # noqa
         self.user = UserModel.objects.get(username="superadmin")
         token = Token.objects.get_or_create(user=self.user)[0]
-        self.client = Client(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
         self.list_url = reverse("project-entry-list")
 
@@ -75,19 +75,30 @@ class TestProjectEntryEndpontsAdmin(TestCase):
     def test_replace(self):
         response = self.client.put(
             reverse("project-entry-detail", kwargs={"pk": 10}),
-            json={
-                    "name": "Blob",
-                    "link": "https://github.com/diomepa/GitKiosk",
-                    "rating": 5,
+            data={
+                "name": "Test Entry 212",
+                "link": "https://github.com/diomepa/GitKiosk",
+                "rating": 5,
             },
         )
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data.get("name"), "Test Entry 212")
 
-    def test_no_auth_update(self):
-        response = self.client.patch(self.detail_url)
-        self.assertEquals(response.status_code, 401)
+    def test_update(self):
+        response = self.client.patch(
+            reverse("project-entry-detail", kwargs={"pk": 10}),
+            data={
+                "rating": 3,
+            },
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data.get("rating"), 3)
 
-    def test_no_auth_delete(self):
-        response = self.client.delete(self.detail_url)
-        self.assertEquals(response.status_code, 401)
+    def test_delete(self):
+        response = self.client.delete(
+            reverse("project-entry-detail", kwargs={"pk": 10})
+        )
+        self.assertEquals(response.status_code, 204)
+
+
+# TODO: Write tests checking edit/delete access denied if not owner !

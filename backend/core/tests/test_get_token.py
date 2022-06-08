@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.urls import reverse
 
 
-class TestGetTokens(TestCase):
+class TestGetTokens(APITestCase):
     fixtures = ["users.json"]
 
     def test_users(self):
