@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  db:
+    ports:
+      - "5432:5432" # expose this in case we want to run the django stuff locally
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      target: "bound-dev"
+    volumes:
+      - ./backend:/app
+    command: ./scripts/dev.run.sh
+
+    ports:
+      - "8000:8000"

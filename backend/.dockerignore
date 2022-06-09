@@ -1,0 +1,5 @@
+*.sqlite3
+*Dockerfile
+**/dev*.*
+*.env
+__pycache__
